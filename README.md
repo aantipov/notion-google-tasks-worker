@@ -4,6 +4,8 @@
 
 This repository contains the CRON Worker for the [Notion-Google Tasks Sync Service](https://notion-google-tasks-sync.com/). Implemented as a Cloudflare Worker, it plays a crucial role in ensuring continuous synchronization between users' Notion databases and Google Tasks.
 
+[aantipov/notion-google-tasks-sync](https://github.com/aantipov/notion-google-tasks-sync) is a companion repository for a website where users setup syncing their data.
+
 ![Worker diagram](./diagram.png)
 
 ### Features
