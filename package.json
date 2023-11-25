@@ -19,7 +19,6 @@
 	},
 	"dependencies": {
 		"@notionhq/client": "^2.2.13",
-		"@tsndr/cloudflare-worker-jwt": "^2.2.5",
 		"drizzle-orm": "^0.29.0"
 	}
 }
