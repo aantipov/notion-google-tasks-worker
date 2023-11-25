@@ -1,16 +1,25 @@
 {
-  "name": "notion-gtasks-worker",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
-    "start": "wrangler dev"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20230419.0",
-    "itty-router": "^3.0.12",
-    "typescript": "^5.0.4",
-    "wrangler": "^3.0.0"
-  }
+	"name": "notion-gtasks-worker",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev --port 3000",
+		"dev-cron": "wrangler dev --test-scheduled --port 3000",
+		"start": "wrangler dev --port 3000",
+		"dry-run": "wrangler deploy --dry-run --outdir mydist",
+		"db": "wrangler d1 execute notion-gtasks --local",
+		"tail": "wrangler tail"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20230419.0",
+		"drizzle-kit": "^0.20.4",
+		"typescript": "^5.0.4",
+		"wrangler": "^3.17.1"
+	},
+	"dependencies": {
+		"@notionhq/client": "^2.2.13",
+		"@tsndr/cloudflare-worker-jwt": "^2.2.5",
+		"drizzle-orm": "^0.29.0"
+	}
 }

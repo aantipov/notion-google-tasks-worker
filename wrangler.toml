@@ -1,35 +1,42 @@
 name = "notion-gtasks-worker"
 main = "src/index.ts"
-compatibility_date = "2023-10-16"
+compatibility_date = "2023-11-24"
 
-# Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
-# Note: Use secrets to store sensitive data.
-# Docs: https://developers.cloudflare.com/workers/platform/environment-variables
-# [vars]
-# MY_VARIABLE = "production_value"
+workers_dev = false
+
+[env.production.vars]
+
+[triggers]
+crons = ["* * * * *"]
+
+[[queues.producers]]
+binding = "QUEUE"
+queue = "notion-gtasks"
+
+[[queues.consumers]]
+queue = "notion-gtasks"
+max_batch_size = 1 # optional: defaults to 10
+max_batch_timeout = 5 # optional: defaults to 5 seconds
+max_retries = 0
+
+[[d1_databases]]
+binding = "DB" # Should match preview_database_id
+database_name = "notion-gtasks"
+database_id = "22e7ad09-c2ae-4374-85f6-6f26b9a5fb5e" # wrangler d1 info YOUR_DATABASE_NAME
+preview_database_id = "DB" # Required for Pages local development
 
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
 # Docs: https://developers.cloudflare.com/workers/runtime-apis/kv
 # [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# binding = "BINDING_NAME"
+# id = ""
+
 
 # Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
 # Docs: https://developers.cloudflare.com/r2/api/workers/workers-api-usage/
 # [[r2_buckets]]
 # binding = "MY_BUCKET"
 # bucket_name = "my-bucket"
-
-# Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
-# Docs: https://developers.cloudflare.com/queues/get-started
-# [[queues.producers]]
-# binding = "MY_QUEUE"
-# queue = "my-queue"
-
-# Bind a Queue consumer. Queue Consumers can retrieve tasks scheduled by Producers to act on them.
-# Docs: https://developers.cloudflare.com/queues/get-started
-# [[queues.consumers]]
-# queue = "my-queue"
 
 # Bind another Worker service. Use this binding to call another Worker without network overhead.
 # Docs: https://developers.cloudflare.com/workers/platform/services
