@@ -86,7 +86,7 @@ export async function fetchTasks(databaseId: string, propsMap: NPropsMapT, acces
 			// @ts-ignore
 			status: result.properties[propsMap.status.name].status.name,
 			// @ts-ignore
-			due: result.properties.Due.date,
+			due: result.properties[propsMap.due.name].date,
 			// @ts-ignore
 			lastEdited: result.properties[propsMap.lastEdited.name].last_edited_time,
 			// @ts-ignore
