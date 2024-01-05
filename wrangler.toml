@@ -7,7 +7,7 @@ workers_dev = false
 [env.production.vars]
 
 [triggers]
-crons = ["* * * * *"]
+crons = ["* * * * *", "0 8 * * *"]
 
 [[queues.producers]]
 binding = "QUEUE"
