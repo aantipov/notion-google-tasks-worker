@@ -9,6 +9,8 @@
 		"start": "wrangler dev --port 3000",
 		"dry-run": "wrangler deploy --dry-run --outdir mydist",
 		"db": "wrangler d1 execute notion-gtasks --local",
+		"db:generate": "drizzle-kit generate:sqlite --schema=src/schema.ts",
+		"db:up": "drizzle-kit up:sqlite --schema=src/schema.ts",
 		"tail": "wrangler tail"
 	},
 	"devDependencies": {

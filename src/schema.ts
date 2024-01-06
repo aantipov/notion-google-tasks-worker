@@ -15,6 +15,10 @@ export const users = sqliteTable('users', {
 	databaseId: text('database_id'),
 	mapping: text('mapping', { mode: 'json' }).$type<[GTaskIdT, NTaskIdT, CompletedAtT?][]>(),
 	lastSynced: integer('last_synced', { mode: 'timestamp' }), // Important to recognize that sync was established successfully
+	setupCompletionPromptSent: integer('setup_completion_prompt_sent', { mode: 'boolean' }),
+	setupCompletionPromptSentDate: integer('setup_completion_prompt_sent_date', {
+		mode: 'timestamp',
+	}),
 	created: integer('created', { mode: 'timestamp' }).notNull(),
 	modified: integer('modified', { mode: 'timestamp' }).notNull(),
 });
@@ -30,6 +34,10 @@ const __syncedUsers = sqliteTable('some-imaginary-table', {
 		.$type<[GTaskIdT, NTaskIdT, CompletedAtT?][]>()
 		.notNull(),
 	lastSynced: integer('last_synced', { mode: 'timestamp' }).notNull(), // Important to recognize that sync was established successfully
+	setupCompletionPromptSent: integer('setup_completion_prompt_sent', { mode: 'boolean' }),
+	setupCompletionPromptSentDate: integer('setup_completion_prompt_sent_date', {
+		mode: 'timestamp',
+	}),
 	created: integer('created', { mode: 'timestamp' }).notNull(),
 	modified: integer('modified', { mode: 'timestamp' }).notNull(),
 });
