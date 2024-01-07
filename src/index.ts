@@ -2,6 +2,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import { and, isNotNull, lte } from 'drizzle-orm';
 import { users } from '@/schema';
 import { syncUser } from './helpers/sync.js';
+import sendSetupCompletionPrompt from './sendSetupCompletionPrompt.js';
 const BATCH_SIZE = 100; // CF limit
 
 const handler: ExportedHandler<Env, string> = {
@@ -17,7 +18,7 @@ const handler: ExportedHandler<Env, string> = {
 				ctx.waitUntil(handleScheduledSync(env));
 				break;
 			case '0 8 * * *': // Every day at 8:00 AM
-				ctx.waitUntil(handleScheduledSendAlmostUsers(env));
+				ctx.waitUntil(sendSetupCompletionPrompt(env));
 				break;
 		}
 		console.log('CRON job finished');
@@ -34,42 +35,6 @@ const handler: ExportedHandler<Env, string> = {
 };
 
 export default handler;
-
-/**
- * Send emails to users who haven't been synced for 24 hours
- * and ask them if they need help
- */
-async function handleScheduledSendAlmostUsers(env: Env): Promise<void> {
-	console.log('Sending emails to almost users');
-	// TODO: fetch emails from DB
-	const emails = ['alexey@notion-google-tasks-sync.com'];
-	// Use Mailjet API to send emails
-	// https://dev.mailjet.com/email/guides/send-api-v31/
-	const mailjetUrl = 'https://api.mailjet.com/v3.1/send';
-	const emailData = {
-		Globals: {
-			From: {
-				Email: 'alexey@notion-google-tasks-sync.com',
-				Name: 'Alexey Antipov',
-			},
-			Subject: `Just Checking In - How's Your Notion-Google Tasks Setup Going?`,
-			TextPart: getTextBody(),
-			HTMLPart: getHtmlBody(),
-		},
-		Messages: emails.map((Email) => ({
-			To: [{ Email }],
-		})),
-	};
-	const response = await fetch(mailjetUrl, {
-		method: 'POST',
-		headers: {
-			Authorization: 'Basic ' + btoa(`${env.MAILJET_API_KEY}:${env.MAILJET_SECRET_KEY}`),
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(emailData),
-	});
-	console.log('Mailjet response', response);
-}
 
 async function handleScheduledSync(env: Env): Promise<void> {
 	const db = drizzle(env.DB, { logger: true });
@@ -123,86 +88,4 @@ async function handleQueue(email: string, env: Env) {
 		console.error('Error handling queue', error);
 		throw new Error('Error handling queue', { cause: error });
 	}
-}
-
-function getHtmlBody() {
-	return `<!DOCTYPE html>
-	<html>
-	<head>
-		<title>Notion-Google Tasks Sync Setup</title>
-		<style>
-			body {
-				font-family: Arial, sans-serif;
-				line-height: 1.6;
-			}
-			.email-container {
-				width: 80%;
-				margin: 0 auto;
-				padding: 20px;
-			}
-			.signature {
-				margin-top: 20px;
-			}
-			a {
-				color: #007bff;
-				text-decoration: none;
-			}
-			a:hover {
-				text-decoration: underline;
-			}
-			.ps {
-				margin-top: 10px;
-				font-style: italic;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="email-container">
-			<p>Hi there,</p>
-	
-			<p>I'm Alexey Antipov, the creator behind the Notion-Google Tasks Sync service. I noticed that you started setting up the sync but didn't get a chance to finish it. I wanted to personally check in and see if everything is okay.</p>
-	
-			<p>Is there something about the connection setup process that's holding you back? I understand these steps can sometimes be a bit tricky. If you're facing any challenges or have questions, I'm here to help. Just hit reply to this email, and I'll do my best to assist you.</p>
-	
-			<p>I created this service to make task management seamless and stress-free, and I'm really keen to see you get the most out of it. Your feedback and experience are invaluable to me.</p>
-	
-			<p>Looking forward to hearing from you!</p>
-	
-			<div class="signature">
-				Best,<br>
-				Alexey Antipov<br>
-				<a href="https://alexei.me/" target="_blank">alexei.me</a>
-			</div>
-	
-			<div class="ps">
-				P.S. If you’ve already finished setting up and have started using the service, I’d love to hear about your experience so far!
-			</div>
-		</div>
-	</body>
-	</html>
-	`;
-}
-
-function getTextBody() {
-	return `Hi there,
-
-
-	I'm Alexey Antipov, the creator behind the Notion-Google Tasks Sync service. I noticed that you started setting up the sync but didn't get a chance to finish it. I wanted to personally check in and see if everything is okay.
-	
-	
-	Is there something about the connection setup process that's holding you back? I understand these steps can sometimes be a bit tricky. If you're facing any challenges or have questions, I'm here to help. Just hit reply to this email, and I'll do my best to assist you.
-	
-	
-	I created this service to make task management seamless and stress-free, and I'm really keen to see you get the most out of it. Your feedback and experience are invaluable to me.
-	
-	
-	Looking forward to hearing from you!
-	
-	
-	Best,
-	Alexey Antipov
-	alexei.me [https://alexei.me/]
-	
-	
-	P.S. If you’ve already finished setting up and have started using the service, I’d love to hear about your experience so far!`;
 }
