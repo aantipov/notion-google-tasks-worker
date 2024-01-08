@@ -15,6 +15,13 @@
       "when": 1704544999636,
       "tag": "0001_tricky_dust",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1704698224747,
+      "tag": "0002_many_stranger",
+      "breakpoints": true
     }
   ]
 }

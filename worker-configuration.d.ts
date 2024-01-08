@@ -5,4 +5,5 @@ interface Env {
 	MAILJET_SECRET_KEY: string;
 	QUEUE: Queue;
 	DB: D1Database;
+	ENVIRONMENT: 'development' | undefined;
 }

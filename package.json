@@ -4,19 +4,27 @@
 	"private": true,
 	"scripts": {
 		"deploy": "wrangler deploy",
+		"start": "wrangler dev --port 3000",
 		"dev": "wrangler dev --port 3000",
 		"dev-cron": "wrangler dev --test-scheduled --port 3000",
-		"start": "wrangler dev --port 3000",
 		"dry-run": "wrangler deploy --dry-run --outdir mydist",
 		"db": "wrangler d1 execute notion-gtasks --local",
-		"db:generate": "drizzle-kit generate:sqlite --schema=src/schema.ts",
-		"db:up": "drizzle-kit up:sqlite --schema=src/schema.ts",
+		"db:migration-gen": "drizzle-kit generate:sqlite",
+		"db:migration-drop": "drizzle-kit drop",
+		"db:migraion-check": "drizzle-kit check:sqlite",
+		"db:drizzle-metadata-upgrade": "drizzle-kit up:sqlite",
+		"db:exec-local": "wrangler d1 execute notion-gtasks --local",
+		"db:exec-local-*": "wrangler d1 execute notion-gtasks --local --command='SELECT * FROM users'",
+		"db:exec-prod": "wrangler d1 execute notion-gtasks",
+		"db:exec-prod-*": "wrangler d1 execute notion-gtasks --command='SELECT * FROM users'",
+		"test": "vitest",
 		"tail": "wrangler tail"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20230419.0",
-		"drizzle-kit": "^0.20.4",
+		"drizzle-kit": "^0.20.10",
 		"typescript": "^5.0.4",
+		"vitest": "^1.1.3",
 		"wrangler": "^3.17.1"
 	},
 	"dependencies": {
