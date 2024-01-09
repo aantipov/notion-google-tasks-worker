@@ -1,5 +1,5 @@
 import { drizzle, type DrizzleD1Database } from 'drizzle-orm/d1';
-import { and, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, eq, isNull, lte, or, sql } from 'drizzle-orm';
 import { users } from '@/schema';
 import { syncUser } from './helpers/sync.js';
 import sendSetupCompletionPrompt from './sendSetupCompletionPrompt.js';
@@ -44,6 +44,10 @@ const handler: ExportedHandler<Env, string> = {
 
 		if (request.url.endsWith('/users-for-sync')) {
 			return fetchTestUsersForSync(env);
+		}
+
+		if (request.url.endsWith('/test')) {
+			return Response.json({ data: 'Hello' });
 		}
 
 		return new Response('Not found', { status: 404 });
@@ -113,8 +117,23 @@ async function handleQueue(email: string, env: Env) {
 	try {
 		await syncUser(email, env);
 		console.log('User synced successfully');
-	} catch (error) {
+	} catch (error: any) {
 		console.error('Error handling queue', error);
+		handleSyncError(email, env, error);
 		throw new Error('Error handling queue', { cause: error });
 	}
+}
+
+async function handleSyncError(email: string, env: Env, error: any) {
+	const db = drizzle(env.DB, { logger: true });
+	const res = await db
+		.select({ email: users.email, syncError: users.syncError })
+		.from(users)
+		.where(eq(users.email, email));
+	const syncError = res[0].syncError || {
+		message: error.toString(),
+		num: 0,
+		nextRetry: 0,
+	};
+	await db.update(users).set({ syncError }).where(eq(users.email, email));
 }
