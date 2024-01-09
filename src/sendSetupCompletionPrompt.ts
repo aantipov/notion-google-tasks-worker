@@ -34,8 +34,8 @@ export default async function sendSetupCompletionPrompt(env: Env): Promise<void>
 			);
 		emails = usersData.map(({ email }) => email);
 	} catch (error) {
-		console.error('Error fetching users data', error);
-		throw new Error('Error fetching users data', { cause: error });
+		console.error('Failed fetching users data', error);
+		throw new Error('Failed fetching users data', { cause: error });
 	}
 
 	console.log('Users fetched:', emails);

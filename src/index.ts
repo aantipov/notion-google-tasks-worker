@@ -92,8 +92,8 @@ export async function getUsersForSync(db: DrizzleD1Database): Promise<{ email: s
 			);
 		console.log('Users fetched:', usersData.length);
 	} catch (error) {
-		console.error('Error fetching users data', error);
-		throw new Error('Error fetching users data', { cause: error });
+		console.error('Failed fetching users data', error);
+		throw new Error('Failed fetching users data', { cause: error });
 	}
 	return usersData;
 }
@@ -119,19 +119,19 @@ async function handleQueue(email: string, env: Env) {
 		console.log('User synced successfully');
 	} catch (error: any) {
 		console.error('Error handling queue', error);
-		handleSyncError(email, env, error);
+		await handleSyncError(email, env, error);
 		throw new Error('Error handling queue', { cause: error });
 	}
 }
 
 async function handleSyncError(email: string, env: Env, error: any) {
 	const db = drizzle(env.DB, { logger: true });
-	const res = await db
+	const [user] = await db
 		.select({ email: users.email, syncError: users.syncError })
 		.from(users)
 		.where(eq(users.email, email));
-	const syncError = res[0].syncError || {
-		message: error.toString(),
+	const syncError = user.syncError || {
+		message: error.toString() + ': ' + error?.cause?.toString?.(),
 		num: 0,
 		nextRetry: 0,
 	};

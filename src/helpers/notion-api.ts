@@ -95,8 +95,8 @@ export async function fetchTasks(databaseId: string, propsMap: NPropsMapT, acces
 			lastEditedByBot: result.properties[propsMap.lastEditedBy.name].last_edited_by.type === 'bot',
 		}));
 	} catch (error) {
-		console.error('Error fetching Notion tasks', error);
-		throw new Error('Error fetching Notion tasks', { cause: error });
+		console.error('Failed fetching Notion tasks', error);
+		throw new Error('Failed fetching Notion tasks', { cause: error });
 	}
 }
 
@@ -172,7 +172,7 @@ export async function fetchPropsMap(databaseId: string, accessToken: string) {
 		} as NPropsMapT;
 		return propsMap;
 	} catch (error) {
-		console.error('Error fetching Notion properties map', error);
-		throw new Error('Error fetching Notion properties map', { cause: error });
+		console.error('Failed fetching Notion properties map', error);
+		throw new Error('Failed fetching Notion properties map', { cause: error });
 	}
 }

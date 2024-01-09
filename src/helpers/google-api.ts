@@ -196,8 +196,8 @@ export async function fetchTasks(userData: UserSyncedT, accessToken: string): Pr
 		const tasksData = (await tasksResp.json()) as GTasksResponseT;
 		return tasksData.items;
 	} catch (error) {
-		console.error('Error fetching Google tasks', error);
-		throw new Error('Error fetching Google tasks', { cause: error });
+		console.error('Failed fetching Google tasks', error);
+		throw new Error('Failed fetching Google tasks', { cause: error });
 	}
 }
 
@@ -213,15 +213,13 @@ export async function fetchAccessToken(refreshToken: string, env: Env): Promise<
 			headers: { accept: 'application/json' },
 		});
 		if (!tokensResp.ok) {
-			throw new Error(
-				`Failed to get working Google access token: ${tokensResp.status} ${tokensResp.statusText}`
-			);
+			throw new Error(`Bad response: ${tokensResp.status} ${tokensResp.statusText}`);
 		}
 		const tokenData = (await tokensResp.json()) as TokenResponseT;
 
 		return tokenData.access_token;
 	} catch (error) {
-		console.error('Error fetching Google access token', error);
-		throw new Error('Error fetching Google access token', { cause: error });
+		console.error('Failed fetching Google access token', error);
+		throw new Error('Failed fetching Google access token', { cause: error });
 	}
 }

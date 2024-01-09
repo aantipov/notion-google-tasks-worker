@@ -23,8 +23,8 @@ export async function syncUser(userEmail: string, env: Env): Promise<void> {
 			lastSynced: userData.lastSynced,
 		});
 	} catch (error) {
-		console.error('Error fetching user data', error);
-		throw new Error('Error fetching user data', { cause: error });
+		console.error('Failed fetching user data', error);
+		throw new Error('Failed fetching user data', { cause: error });
 	}
 
 	let newMapping = [...userData.mapping];
