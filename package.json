@@ -29,6 +29,7 @@
 	},
 	"dependencies": {
 		"@notionhq/client": "^2.2.13",
-		"drizzle-orm": "^0.29.0"
+		"drizzle-orm": "^0.29.0",
+		"zod": "^3.22.4"
 	}
 }

@@ -35,8 +35,6 @@ export async function syncUser(userEmail: string, env: Env): Promise<void> {
 	const gAccessToken = await googleApi.fetchAccessToken(gToken.refresh_token, env);
 
 	// ==== 3. Fetch Notion properties map and ensure it's correct ====
-	// TODO: ensure the user's selected database has all the required properties
-	// TODO: ensure Status prop has proper values
 	const nPropsMap = await notionApi.fetchPropsMap(userData.databaseId, nAccessToken);
 	console.log('nPropsMap fetched');
 

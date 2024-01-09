@@ -1,5 +1,6 @@
 import { Client } from '@notionhq/client';
 import { GTaskT } from './google-api';
+import { validateDbBSchema } from './validate-db';
 
 export interface NTokenResponseT {
 	access_token: string;
@@ -162,13 +163,19 @@ export async function createTask(
 export async function fetchPropsMap(databaseId: string, accessToken: string) {
 	try {
 		const notion = new Client({ auth: accessToken });
-		const response = await notion.databases.retrieve({ database_id: databaseId });
+		const dbSchema = await notion.databases.retrieve({ database_id: databaseId });
+		const validRes = validateDbBSchema(dbSchema);
+		if (validRes.success === false) {
+			console.error('Invalid DB schema', validRes.issues);
+			throw new Error('Invalid DB schema', { cause: validRes.issues });
+		}
+
 		const propsMap = {
-			title: Object.values(response.properties).find((p) => p.type === 'title'),
-			status: Object.values(response.properties).find((p) => p.type === 'status'),
-			due: Object.values(response.properties).find((p) => p.type === 'date'),
-			lastEdited: Object.values(response.properties).find((p) => p.type === 'last_edited_time'),
-			lastEditedBy: Object.values(response.properties).find((p) => p.type === 'last_edited_by'),
+			title: Object.values(dbSchema.properties).find((p) => p.type === 'title'),
+			status: Object.values(dbSchema.properties).find((p) => p.type === 'status'),
+			due: Object.values(dbSchema.properties).find((p) => p.type === 'date'),
+			lastEdited: Object.values(dbSchema.properties).find((p) => p.type === 'last_edited_time'),
+			lastEditedBy: Object.values(dbSchema.properties).find((p) => p.type === 'last_edited_by'),
 		} as NPropsMapT;
 		return propsMap;
 	} catch (error) {

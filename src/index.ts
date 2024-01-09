@@ -57,7 +57,7 @@ const handler: ExportedHandler<Env, string> = {
 export default handler;
 
 async function handleScheduledSync(env: Env): Promise<void> {
-	const db = drizzle(env.DB, { logger: true });
+	const db = drizzle(env.DB, { logger: false });
 	const usersData = await getUsersForSync(db);
 
 	try {
@@ -130,10 +130,24 @@ async function handleSyncError(email: string, env: Env, error: any) {
 		.select({ email: users.email, syncError: users.syncError })
 		.from(users)
 		.where(eq(users.email, email));
-	const syncError = user.syncError || {
+	const num = user.syncError?.num || 0;
+	const syncError = {
 		message: error.toString() + ': ' + error?.cause?.toString?.(),
-		num: 0,
-		nextRetry: 0,
+		num: num + 1,
+		nextRetry: getNextRetryInMs(num),
 	};
 	await db.update(users).set({ syncError }).where(eq(users.email, email));
+}
+
+function getNextRetryInMs(num: number): number | null {
+	const dayInMin = 24 * 60;
+	const retryTimesInMin = [20, 80, 320, 640];
+	const retryDeltaInMin = num < retryTimesInMin.length ? retryTimesInMin[num] : dayInMin;
+
+	// Max 10 retries within 5 days
+	if (num >= 10) {
+		return null;
+	}
+
+	return Date.now() + retryDeltaInMin * 60 * 1000;
 }
