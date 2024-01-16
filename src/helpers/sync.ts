@@ -83,7 +83,11 @@ export async function syncUser(userEmail: string, env: Env): Promise<void> {
 	console.log(`Data housekeeping: ${tasksToBeRemoved} tasks to be removed from mapping`);
 	await db
 		.update(users)
-		.set({ lastSynced: new Date(), ...(hasMappingChanged ? { mapping: cleanedMapping } : {}) })
+		.set({
+			lastSynced: new Date(),
+			...(hasMappingChanged ? { mapping: cleanedMapping } : {}),
+			syncError: null,
+		})
 		.where(eq(users.email, userEmail));
 	console.log('Data housekeeping done');
 

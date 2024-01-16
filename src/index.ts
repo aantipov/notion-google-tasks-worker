@@ -125,7 +125,7 @@ async function handleQueue(email: string, env: Env) {
 }
 
 async function handleSyncError(email: string, env: Env, error: any) {
-	const db = drizzle(env.DB, { logger: true });
+	const db = drizzle(env.DB, { logger: false });
 	const [user] = await db
 		.select({ email: users.email, syncError: users.syncError })
 		.from(users)
