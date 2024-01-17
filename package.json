@@ -17,6 +17,7 @@
 		"db:exec-local-*": "wrangler d1 execute notion-gtasks --local --command='SELECT * FROM users'",
 		"db:exec-prod": "wrangler d1 execute notion-gtasks",
 		"db:exec-prod-*": "wrangler d1 execute notion-gtasks --command='SELECT * FROM users'",
+		"db:prod:active-count": "wrangler d1 execute notion-gtasks --command='SELECT COUNT(*) FROM users WHERE sync_error IS NULL AND last_synced IS NOT NULL'",
 		"test": "vitest",
 		"tail": "wrangler tail"
 	},
