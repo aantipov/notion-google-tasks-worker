@@ -3,7 +3,7 @@ import { and, eq, isNull, lte, or, sql } from 'drizzle-orm';
 import { users } from '@/schema';
 import { syncUser } from './helpers/sync.js';
 import sendSetupCompletionPrompt from './sendSetupCompletionPrompt.js';
-import { fetchTestUsersForSync } from './test-endpoints';
+// import sendFailedSyncNotify from './sendFailedSyncNotify.js';
 const BATCH_SIZE = 100; // CF limit
 
 const handler: ExportedHandler<Env, string> = {
@@ -20,6 +20,11 @@ const handler: ExportedHandler<Env, string> = {
 				break;
 			case '0 8 * * *': // Every day at 8:00 AM
 				ctx.waitUntil(sendSetupCompletionPrompt(env));
+				break;
+			case '*/2 * * * *':
+				console.log('do nothing');
+				// TODO: to be implemented
+				// ctx.waitUntil(sendFailedSyncNotify(env));
 				break;
 		}
 		console.log('CRON job finished');
@@ -40,14 +45,6 @@ const handler: ExportedHandler<Env, string> = {
 	async fetch(request, env) {
 		if (env.ENVIRONMENT !== 'development') {
 			return new Response('Not found', { status: 404 });
-		}
-
-		if (request.url.endsWith('/users-for-sync')) {
-			return fetchTestUsersForSync(env);
-		}
-
-		if (request.url.endsWith('/test')) {
-			return Response.json({ data: 'Hello' });
 		}
 
 		return new Response('Not found', { status: 404 });

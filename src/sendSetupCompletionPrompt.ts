@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/d1';
-import { and, eq, inArray, isNull, lte } from 'drizzle-orm';
+import { and, inArray, isNull, lte } from 'drizzle-orm';
 import { users } from '@/schema';
 
 interface MailjetResponseT {

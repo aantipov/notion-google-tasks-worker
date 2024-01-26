@@ -4,10 +4,12 @@ compatibility_date = "2024-01-09"
 
 workers_dev = false
 
+tail_consumers = [{service = "notion-gtasks-worker-tail"}]
+
 [env.production.vars]
 
 [triggers]
-crons = ["* * * * *", "0 8 * * *"]
+crons = ["* * * * *", "0 8 * * *",  "*/2 * * * *"]
 
 [[queues.producers]]
 binding = "QUEUE"
