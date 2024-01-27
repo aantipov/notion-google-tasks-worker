@@ -3,7 +3,7 @@ import { and, eq, isNull, lte, or, sql } from 'drizzle-orm';
 import { users } from '@/schema';
 import { syncUser } from './helpers/sync.js';
 import sendSetupCompletionPrompt from './sendSetupCompletionPrompt.js';
-// import sendFailedSyncNotify from './sendFailedSyncNotify.js';
+import sendFailedSyncNotify from './sendFailedSyncNotify.js';
 const BATCH_SIZE = 100; // CF limit
 
 const handler: ExportedHandler<Env, string> = {
@@ -21,10 +21,8 @@ const handler: ExportedHandler<Env, string> = {
 			case '0 8 * * *': // Every day at 8:00 AM
 				ctx.waitUntil(sendSetupCompletionPrompt(env));
 				break;
-			case '*/2 * * * *':
-				console.log('do nothing');
-				// TODO: to be implemented
-				// ctx.waitUntil(sendFailedSyncNotify(env));
+			case '0 9 * * *':
+				ctx.waitUntil(sendFailedSyncNotify(env));
 				break;
 		}
 		console.log('CRON job finished');

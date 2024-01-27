@@ -23,6 +23,7 @@ export const users = sqliteTable('users', {
 		message: string;
 		num: number; // Number of consecutive sync errors
 		nextRetry: number | null; // Timestamp in ms. Null if no retries left. Max 10 retries within 5 days
+		sentEmail?: true;
 	}>(), // Last sync error message. Reset to null on successful sync
 	created: integer('created', { mode: 'timestamp' }).notNull(),
 	modified: integer('modified', { mode: 'timestamp' }).notNull(),
@@ -47,6 +48,7 @@ const __syncedUsers = sqliteTable('some-imaginary-table', {
 		message: string;
 		num: number;
 		nextRetry: number | null;
+		sentEmail?: true;
 	}>(),
 	created: integer('created', { mode: 'timestamp' }).notNull(),
 	modified: integer('modified', { mode: 'timestamp' }).notNull(),

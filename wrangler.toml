@@ -9,7 +9,7 @@ tail_consumers = [{service = "notion-gtasks-worker-tail"}]
 [env.production.vars]
 
 [triggers]
-crons = ["* * * * *", "0 8 * * *",  "*/2 * * * *"]
+crons = ["* * * * *", "0 8 * * *",  "0 9 * * *"]
 
 [[queues.producers]]
 binding = "QUEUE"

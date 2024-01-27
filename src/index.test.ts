@@ -1,7 +1,7 @@
 import { unstable_dev, getBindingsProxy } from 'wrangler';
 import type { UnstableDevWorker } from 'wrangler';
 import { describe, beforeAll, afterAll, beforeEach, it, expect } from 'vitest';
-// import { getEmailsForFailedSyncNotify, setFailedSyncNotifed } from './sendFailedSyncNotify';
+import { getEmailsForFailedSyncNotify, setFailedSyncNotifed } from './sendFailedSyncNotify';
 import { DrizzleD1Database, drizzle } from 'drizzle-orm/d1';
 import { users } from './schema';
 import { getUsersForSync } from '@/index';
@@ -33,19 +33,19 @@ describe('Test D1', () => {
 		expect(data).toMatchObject(expectedResults);
 	});
 
-	// it('should return an array of users to notify about failed sync', async () => {
-	// 	const expectedResults = ['three2@example.com', 'five@example.com'];
-	// 	const emails = await getEmailsForFailedSyncNotify(db);
-	// 	expect(emails).toMatchObject(expectedResults);
-	// });
+	it('should return an array of users to notify about failed sync', async () => {
+		const expectedResults = ['three2@example.com', 'five@example.com'];
+		const emails = await getEmailsForFailedSyncNotify(db);
+		expect(emails).toMatchObject(expectedResults);
+	});
 
-	// it('should mark users as notified about failed sync', async () => {
-	// 	const emails = ['three2@example.com', 'five@example.com'];
-	// 	const res = await setFailedSyncNotifed(db, emails);
-	// 	expect(res.length).toBe(2);
-	// 	expect(res[0].syncError?.sentEmail).toBe(true);
-	// 	expect(res[1].syncError?.sentEmail).toBe(true);
-	// });
+	it('should mark users as notified about failed sync', async () => {
+		const emails = ['three2@example.com', 'five@example.com'];
+		const res = await setFailedSyncNotifed(db, emails);
+		expect(res.length).toBe(2);
+		expect(res[0].syncError?.sentEmail).toBe(true);
+		expect(res[1].syncError?.sentEmail).toBe(true);
+	});
 });
 
 async function populateDummyData(db: DrizzleD1Database) {
