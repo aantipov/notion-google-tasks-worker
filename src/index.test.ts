@@ -2,9 +2,9 @@ import { unstable_dev, getBindingsProxy } from 'wrangler';
 import type { UnstableDevWorker } from 'wrangler';
 import { describe, beforeAll, afterAll, beforeEach, it, expect } from 'vitest';
 import { getEmailsForFailedSyncNotify, setFailedSyncNotifed } from './sendFailedSyncNotify';
+import { getUsersForSync } from './scheduledSync';
 import { DrizzleD1Database, drizzle } from 'drizzle-orm/d1';
 import { users } from './schema';
-import { getUsersForSync } from '@/index';
 
 describe('Test D1', () => {
 	let worker: UnstableDevWorker;
