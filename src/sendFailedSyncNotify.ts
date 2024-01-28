@@ -72,7 +72,6 @@ export async function setFailedSyncNotifed(db: DrizzleD1Database, emails: string
 }
 
 async function sendEmails(emails: string[], env: Env): Promise<void> {
-	emails = ['antipov.alexei@gmail.com'];
 	// Use Mailjet API to send emails
 	// https://dev.mailjet.com/email/guides/send-api-v31/
 	const mailjetUrl = 'https://api.mailjet.com/v3.1/send';
