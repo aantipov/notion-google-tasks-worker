@@ -75,10 +75,11 @@ async function handleSyncError(email: string, env: Env, error: any) {
 		.from(users)
 		.where(eq(users.email, email));
 	const num = user.syncError?.num || 0;
-	const syncError = {
+	const syncError: typeof user.syncError = {
 		message: error.toString() + ': ' + error?.cause?.toString?.(),
 		num: num + 1,
 		nextRetry: getNextRetryInMs(num),
+		sentEmail: user.syncError?.sentEmail || false,
 	};
 	await db.update(users).set({ syncError }).where(eq(users.email, email));
 }

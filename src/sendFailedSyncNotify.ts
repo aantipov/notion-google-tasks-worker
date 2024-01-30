@@ -62,7 +62,6 @@ export async function setFailedSyncNotifed(db: DrizzleD1Database, emails: string
 		return await db
 			.update(users)
 			.set({ syncError: sql.raw("json_set(sync_error, '$.sentEmail', json('true'))") })
-			// .set({ setupCompletionPromptSent: true, setupCompletionPromptSentDate: new Date() })
 			.where(inArray(users.email, emails))
 			.returning();
 	} catch (error) {
