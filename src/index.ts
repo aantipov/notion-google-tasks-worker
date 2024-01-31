@@ -1,10 +1,17 @@
 import { drizzle } from 'drizzle-orm/d1';
 import { eq } from 'drizzle-orm';
 import { users } from '@/schema';
+import { Toucan } from 'toucan-js';
 import { syncUser } from './helpers/sync.js';
 import sendSetupCompletionPrompt from './sendSetupCompletionPrompt.js';
 import sendFailedSyncNotify from './sendFailedSyncNotify.js';
 import { handleScheduledSync } from './scheduledSync.js';
+
+const crontTypesMap = {
+	'* * * * *': 'sync-cron',
+	'0 8 * * *': 'send-completion-prompt-cron',
+	'0 9 * * *': 'send-failed-sync-notify-cron',
+};
 
 const handler: ExportedHandler<Env, string> = {
 	/**
@@ -35,6 +42,50 @@ const handler: ExportedHandler<Env, string> = {
 	async queue(batch, env, ctx) {
 		// There is only one message in the batch because we set "max_batch_size" to 1 in the wrangler.toml config
 		ctx.waitUntil(handleQueue(batch.messages[0].body, env));
+	},
+
+	/**
+	 * https://developers.cloudflare.com/workers/observability/tail-workers/
+	 * https://developers.cloudflare.com/workers/runtime-apis/handlers/tail/#tailitems
+	 */
+	async tail(events, env, context) {
+		const sentry = new Toucan({
+			dsn: env.SENTRY_DSN,
+			context,
+		});
+		const ev = events[0];
+		const hasErrorLogs = ev.logs.some((log) => log.level === 'error');
+		if (ev.outcome === 'ok' && !hasErrorLogs) {
+			return;
+		}
+		sentry.setTag('ct.outcome', ev.outcome);
+		(() => {
+			let type = 'unknown';
+
+			if (ev.event && 'queue' in ev.event) {
+				type = 'sync';
+			}
+			if (ev.event && 'cron' in ev.event) {
+				// @ts-ignore
+				type = crontTypesMap[ev.event.cron] || 'cron';
+			}
+
+			sentry.setTag('ct.type', type);
+		})();
+		if (ev.outcome !== 'exception') {
+			sentry.captureException(new Error(ev.outcome));
+		}
+		// Record console.log as breadcrumbs
+		ev.logs.forEach((log) => {
+			sentry.addBreadcrumb({
+				message: log.message,
+				type: log.level === 'error' ? 'error' : 'info',
+				level: log.level === 'error' ? 'error' : 'info',
+				timestamp: log.timestamp,
+			});
+		});
+
+		await sentry.captureException(ev.exceptions[0]);
 	},
 
 	/**

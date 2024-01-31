@@ -4,7 +4,7 @@ compatibility_date = "2024-01-09"
 
 workers_dev = false
 
-tail_consumers = [{service = "notion-gtasks-worker-tail"}]
+tail_consumers = [{service = "notion-gtasks-worker"}]
 
 [env.production.vars]
 
