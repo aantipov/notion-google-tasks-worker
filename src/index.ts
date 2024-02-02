@@ -73,19 +73,20 @@ const handler: ExportedHandler<Env, string> = {
 			sentry.setTag('ct.type', type);
 		})();
 		if (ev.outcome !== 'exception') {
-			sentry.captureException(new Error(ev.outcome));
+			await sentry.captureException(new Error(ev.outcome));
+			return;
 		}
 		// Record console.log as breadcrumbs
 		ev.logs.forEach((log) => {
 			sentry.addBreadcrumb({
 				message: log.message,
-				type: log.level === 'error' ? 'error' : 'info',
-				level: log.level === 'error' ? 'error' : 'info',
+				// type: log.level === 'error' ? 'error' : 'info',
+				// level: log.level === 'error' ? 'error' : 'info',
 				timestamp: log.timestamp,
 			});
 		});
 
-		await sentry.captureException(ev.exceptions[0]);
+		await sentry.captureException(new Error(ev.exceptions[0].message));
 	},
 
 	/**
