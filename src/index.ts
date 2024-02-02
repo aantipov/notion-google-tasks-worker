@@ -79,9 +79,9 @@ const handler: ExportedHandler<Env, string> = {
 		// Record console.log as breadcrumbs
 		ev.logs.forEach((log) => {
 			sentry.addBreadcrumb({
-				message: log.message,
-				// type: log.level === 'error' ? 'error' : 'info',
-				// level: log.level === 'error' ? 'error' : 'info',
+				message: JSON.stringify(log.message),
+				type: log.level === 'error' ? 'error' : 'info',
+				level: log.level === 'error' ? 'error' : 'info',
 				timestamp: log.timestamp,
 			});
 		});
