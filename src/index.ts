@@ -80,7 +80,7 @@ const handler: ExportedHandler<Env, string> = {
 		// Record console.log as breadcrumbs
 		ev.logs.forEach((log) => {
 			if (log.message.length === 2 && log.message[0] === 'email') {
-				sentry.setTag('email', log.message[1]);
+				sentry.setTag('user', log.message[1]);
 			} else {
 				sentry.addBreadcrumb({
 					message:
