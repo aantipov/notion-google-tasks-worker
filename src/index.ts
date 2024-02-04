@@ -45,6 +45,7 @@ const handler: ExportedHandler<Env, string> = {
 	},
 
 	/**
+	 * Sentry logging
 	 * https://developers.cloudflare.com/workers/observability/tail-workers/
 	 * https://developers.cloudflare.com/workers/runtime-apis/handlers/tail/#tailitems
 	 */
@@ -78,12 +79,17 @@ const handler: ExportedHandler<Env, string> = {
 		}
 		// Record console.log as breadcrumbs
 		ev.logs.forEach((log) => {
-			sentry.addBreadcrumb({
-				message: JSON.stringify(log.message),
-				type: log.level === 'error' ? 'error' : 'info',
-				level: log.level === 'error' ? 'error' : 'info',
-				timestamp: log.timestamp,
-			});
+			if (log.message.length === 2 && log.message[0] === 'email') {
+				sentry.setTag('email', log.message[1]);
+			} else {
+				sentry.addBreadcrumb({
+					message:
+						log.message.length === 1 ? JSON.stringify(log.message[0]) : JSON.stringify(log.message),
+					type: log.level === 'error' ? 'error' : 'info',
+					level: log.level === 'error' ? 'error' : 'info',
+					timestamp: Math.floor(log.timestamp / 1000), // Sentry expects seconds
+				});
+			}
 		});
 
 		await sentry.captureException(new Error(ev.exceptions[0].message));
@@ -110,6 +116,7 @@ export default handler;
  * The return value is ignored: it should return either a value or a promise.
  */
 async function handleQueue(email: string, env: Env) {
+	console.log('email', email);
 	try {
 		await syncUser(email, env);
 		console.log('User synced successfully');

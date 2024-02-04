@@ -62,6 +62,7 @@ export interface NPropsMapT {
  * TODO: fetch more than 100 tasks
  */
 export async function fetchTasks(databaseId: string, propsMap: NPropsMapT, accessToken: string) {
+	console.log('Notion API: fetching tasks');
 	try {
 		const notion = new Client({ auth: accessToken });
 		const filterProps = Object.values(propsMap).map((prop: { id: any }) => prop.id);
@@ -95,9 +96,10 @@ export async function fetchTasks(databaseId: string, propsMap: NPropsMapT, acces
 			// @ts-ignore
 			lastEditedByBot: result.properties[propsMap.lastEditedBy.name].last_edited_by.type === 'bot',
 		}));
+		console.log('Notion API: fetched tasks');
 	} catch (error) {
-		console.error('Failed fetching Notion tasks', error);
-		throw new Error('Failed fetching Notion tasks', { cause: error });
+		console.error('Notion API: failed to fetch tasks', error);
+		throw new Error('Notion API: failed to fetch tasks', { cause: error });
 	}
 }
 
@@ -108,7 +110,7 @@ export async function updateTask(
 	accessToken: string
 ) {
 	try {
-		console.log('Updating Notion task', nTaskId);
+		console.log('NotionAPI: updating a task', nTaskId);
 		const notion = new Client({ auth: accessToken });
 		const date = gTask.due ? { start: gTask.due.slice(0, 10) } : null;
 		const properties = {
@@ -117,21 +119,28 @@ export async function updateTask(
 			[propsMap.status.name]: { status: { name: gTask.status === 'completed' ? 'Done' : 'To Do' } },
 		};
 		const response = await notion.pages.update({ page_id: nTaskId, properties });
+		console.log('NotionAPI: updated a task', nTaskId);
 		return response;
 	} catch (error) {
-		console.error('Error creating Notion task', error);
-		throw new Error('Error creating Notion task', { cause: error });
+		console.error('NotionAPI: error creating a task', error);
+		throw new Error('NotionAPI: error creating a task', { cause: error });
 	}
 }
 
 export async function deleteTask(nTaskId: string, accessToken: string) {
-	console.log('Deleting Notion task', nTaskId);
-	const notion = new Client({ auth: accessToken });
-	const response = await notion.pages.update({
-		page_id: nTaskId,
-		archived: true,
-	});
-	return response;
+	console.log('NotionAPI: deleting a task', nTaskId);
+	try {
+		const notion = new Client({ auth: accessToken });
+		const response = await notion.pages.update({
+			page_id: nTaskId,
+			archived: true,
+		});
+		console.log('NotionAPI: deleted a task', nTaskId);
+		return response;
+	} catch (error) {
+		console.error('NotionAPI: error deleting a task', error);
+		throw new Error('NotionAPI: error deleting a task', { cause: error });
+	}
 }
 
 export async function createTask(
@@ -140,7 +149,7 @@ export async function createTask(
 	propsMap: NPropsMapT,
 	accessToken: string
 ) {
-	console.log('Creating Notion task');
+	console.log('NotionAPI: creating a task');
 	try {
 		const notion = new Client({ auth: accessToken });
 		const date = gTask.due ? { start: gTask.due.slice(0, 10) } : null;
@@ -153,14 +162,16 @@ export async function createTask(
 			parent: { database_id: nDatabaseId },
 			properties,
 		});
+		console.log('NotionAPI: created a task');
 		return response;
 	} catch (error) {
-		console.error('Error creating Notion task', error);
-		throw new Error('Error creating Notion task', { cause: error });
+		console.error('NotionAPI: error creating a task', error);
+		throw new Error('NotionAPI: error creating a task', { cause: error });
 	}
 }
 
 export async function fetchPropsMap(databaseId: string, accessToken: string) {
+	console.log('NotionAPI: fetching DB properties map', databaseId);
 	try {
 		const notion = new Client({ auth: accessToken });
 		const dbSchema = await notion.databases.retrieve({ database_id: databaseId });
@@ -177,9 +188,10 @@ export async function fetchPropsMap(databaseId: string, accessToken: string) {
 			lastEdited: Object.values(dbSchema.properties).find((p) => p.type === 'last_edited_time'),
 			lastEditedBy: Object.values(dbSchema.properties).find((p) => p.type === 'last_edited_by'),
 		} as NPropsMapT;
+		console.log('NotionAPI: fetched DB properties map', databaseId);
 		return propsMap;
 	} catch (error) {
-		console.error('Failed fetching Notion properties map', error);
-		throw new Error('Failed fetching Notion properties map', { cause: error });
+		console.error('NotionAPI: failed to fetch DB properties map', error);
+		throw new Error('NotionAPI: failed to fetch DB properties map', { cause: error });
 	}
 }

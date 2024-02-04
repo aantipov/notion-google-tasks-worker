@@ -14,7 +14,7 @@ export async function syncUser(userEmail: string, env: Env): Promise<void> {
 	let userData: UserSyncedT;
 	try {
 		[userData] = (await db.select().from(users).where(eq(users.email, userEmail))) as UserSyncedT[];
-		console.log('usersData fetched', {
+		console.log('userData fetched', {
 			tasklistId: userData.tasklistId,
 			databaseId: userData.databaseId,
 			mappingNumber: userData.mapping.length,

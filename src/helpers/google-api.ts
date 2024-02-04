@@ -64,7 +64,7 @@ export async function createTask(
 	tasklistId: string,
 	accessToken: string // access token
 ): Promise<GTaskT> {
-	console.log('Creating Google task');
+	console.log('GoogleAPI: creating a task');
 	try {
 		const tasksAPIUrl = new URL(`https://tasks.googleapis.com/tasks/v1/lists/${tasklistId}/tasks`);
 
@@ -85,11 +85,12 @@ export async function createTask(
 				`Failed to create a Google task: ${tasksResp.status} ${tasksResp.statusText}`
 			);
 		}
-		const resp = await tasksResp.json();
-		return resp as GTaskT;
+		const resp = (await tasksResp.json()) as GTaskT;
+		console.log('GoogleAPI: successfully created a task', resp.id);
+		return resp;
 	} catch (error) {
-		console.error('Error creating a google task', error);
-		throw new Error('Error creating a google task', { cause: error });
+		console.error('GoogleAPI: error creating a task', error);
+		throw new Error('GoogleAPI: error creating a task', { cause: error });
 	}
 }
 
@@ -99,7 +100,7 @@ export async function updateTask(
 	tasklistId: string,
 	accessToken: string
 ): Promise<GTaskT> {
-	console.log('Updating Google task', gTaskId);
+	console.log('GoogleAPI: updating a task', gTaskId);
 	try {
 		const tasksAPIUrl = new URL(
 			`https://tasks.googleapis.com/tasks/v1/lists/${tasklistId}/tasks/${gTaskId}`
@@ -121,14 +122,15 @@ export async function updateTask(
 
 		if (!tasksResp.ok) {
 			throw new Error(
-				`Failed to update a Google task: ${tasksResp.status} ${tasksResp.statusText}`
+				`GoogleAPI: failed to update a task: ${tasksResp.status} ${tasksResp.statusText}`
 			);
 		}
 		const updatedTask = (await tasksResp.json()) as GTaskT;
+		console.log('GoogleAPI: updated task', gTaskId);
 		return updatedTask;
 	} catch (error) {
-		console.error('Error updating a google task', error);
-		throw new Error('Error updating a google task', { cause: error });
+		console.error('GoogleAPI: error updating a task', error);
+		throw new Error('GoogleAPI: error updating a task', { cause: error });
 	}
 }
 
@@ -140,7 +142,7 @@ export async function deleteTask(
 	tasklistId: string,
 	accessToken: string
 ): Promise<GTaskT> {
-	console.log('Deleting Google task', taskId);
+	console.log('GoogleAPI: deleting a task', taskId);
 	try {
 		const tasksAPIUrl = new URL(
 			`https://tasks.googleapis.com/tasks/v1/lists/${tasklistId}/tasks/${taskId}`
@@ -158,14 +160,15 @@ export async function deleteTask(
 
 		if (!tasksResp.ok) {
 			throw new Error(
-				`Failed to delete a Google task: ${tasksResp.status} ${tasksResp.statusText}`
+				`GoogleAPI: failed to delete a task: ${tasksResp.status} ${tasksResp.statusText}`
 			);
 		}
 		const deleted = (await tasksResp.json()) as GTaskT;
+		console.log('GoogleAPI: deleted a task', taskId);
 		return deleted;
 	} catch (error) {
-		console.error('Error deleting a google task', tasklistId, taskId, error);
-		throw new Error('Error deleting a google task', { cause: error });
+		console.error('GoogleAPI: error deleting a task', tasklistId, taskId, error);
+		throw new Error('GoogleAPI: error deleting a task', { cause: error });
 	}
 }
 
@@ -196,8 +199,8 @@ export async function fetchTasks(userData: UserSyncedT, accessToken: string): Pr
 		const tasksData = (await tasksResp.json()) as GTasksResponseT;
 		return tasksData.items;
 	} catch (error) {
-		console.error('Failed fetching Google tasks', error);
-		throw new Error('Failed fetching Google tasks', { cause: error });
+		console.error('GoogleAPI: failed to fetch tasks', error);
+		throw new Error('GoogleAPI: failed to fetch tasks', { cause: error });
 	}
 }
 
@@ -219,7 +222,7 @@ export async function fetchAccessToken(refreshToken: string, env: Env): Promise<
 
 		return tokenData.access_token;
 	} catch (error) {
-		console.error('Failed fetching Google access token', error);
-		throw new Error('Failed fetching Google access token', { cause: error });
+		console.error('GoogleAPI: failed to fetch access token', error);
+		throw new Error('GoogleAPI: failed to fetch access token', { cause: error });
 	}
 }

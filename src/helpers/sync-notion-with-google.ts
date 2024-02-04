@@ -10,6 +10,7 @@ export default async function syncNotionWithGoogle(
 	userData: UserSyncedT, // current state of the user in DB
 	nPropsMap: notionApi.NPropsMapT
 ): Promise<MappingUpdatesT> {
+	console.log('Notion: match Google');
 	try {
 		const mappingUpdates: MappingUpdatesT = {
 			newItems: [],
@@ -74,8 +75,8 @@ export default async function syncNotionWithGoogle(
 
 		return mappingUpdates;
 	} catch (error) {
-		console.error('Error syncing Notion with Google', error);
-		throw new Error('Error syncing Notion with Google', { cause: error });
+		console.error('Notion: failed to match with Google', error);
+		throw new Error('Notion: failed to match with Google', { cause: error });
 	}
 }
 
