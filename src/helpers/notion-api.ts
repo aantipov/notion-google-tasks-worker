@@ -78,6 +78,8 @@ export async function fetchTasks(databaseId: string, propsMap: NPropsMapT, acces
 			],
 		});
 
+		console.log('Notion API: fetched tasks');
+
 		return response.results.map((result) => ({
 			id: result.id,
 			// @ts-ignore
@@ -96,7 +98,6 @@ export async function fetchTasks(databaseId: string, propsMap: NPropsMapT, acces
 			// @ts-ignore
 			lastEditedByBot: result.properties[propsMap.lastEditedBy.name].last_edited_by.type === 'bot',
 		}));
-		console.log('Notion API: fetched tasks');
 	} catch (error) {
 		console.error('Notion API: failed to fetch tasks', error);
 		throw new Error('Notion API: failed to fetch tasks', { cause: error });
@@ -122,8 +123,8 @@ export async function updateTask(
 		console.log('NotionAPI: updated a task', nTaskId);
 		return response;
 	} catch (error) {
-		console.error('NotionAPI: error creating a task', error);
-		throw new Error('NotionAPI: error creating a task', { cause: error });
+		console.error('NotionAPI: error updating a task', error);
+		throw new Error('NotionAPI: error updating a task', { cause: error });
 	}
 }
 

@@ -56,7 +56,14 @@ export async function syncUser(userEmail: string, env: Env): Promise<void> {
 	await updateUserMappingInDB(gMappingsUpdates);
 
 	// ==== 7. Sync Notion with Google ====
-	const nMappingsUpdates = await syncNotionWithGoogle(nAllTasks, gTasks, userData, nPropsMap);
+	// Exclude gTasks that have been deleted on previous step
+	const gTasksUpdated = gTasks.filter((gTask) => !gMappingsUpdates.deleted.includes(gTask.id));
+	const nMappingsUpdates = await syncNotionWithGoogle(
+		nAllTasks,
+		gTasksUpdated,
+		userData,
+		nPropsMap
+	);
 	console.log('Notion Tasks Sync Results', {
 		created: nMappingsUpdates.newItems.length,
 		updated: nMappingsUpdates.updated.length,
