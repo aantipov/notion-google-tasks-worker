@@ -123,7 +123,7 @@ async function handleQueue(email: string, env: Env) {
 	} catch (error: any) {
 		console.error('Error handling queue', error);
 		await handleSyncError(email, env, error);
-		throw new Error('Error handling queue', { cause: error });
+		throw error;
 	}
 }
 
