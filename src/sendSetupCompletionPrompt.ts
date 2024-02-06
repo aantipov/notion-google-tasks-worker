@@ -38,6 +38,11 @@ export default async function sendSetupCompletionPrompt(env: Env): Promise<void>
 		throw new Error('Failed fetching users data', { cause: error });
 	}
 
+	if (emails.length === 0) {
+		console.log('No users to send emails to');
+		return;
+	}
+
 	console.log('Users fetched:', emails);
 
 	// Update DB - set setupCompletionPromptSent to true
