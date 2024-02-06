@@ -7,10 +7,54 @@ import sendSetupCompletionPrompt from './sendSetupCompletionPrompt.js';
 import sendFailedSyncNotify from './sendFailedSyncNotify.js';
 import { handleScheduledSync } from './scheduledSync.js';
 
-const crontTypesMap = {
+class SyncError extends Error {
+	originalMessage: string;
+	constructor(message: string, originalError?: any) {
+		const name = 'SyncError';
+		const msg =
+			`${name}: ${message}` + (originalError ? `\nCaused by: ${originalError?.message}` : '');
+		super(msg);
+		this.name = name;
+		this.cause = originalError; // Storing the original error
+		this.originalMessage = originalError?.message;
+	}
+}
+
+class SendCompletionPromptError extends Error {
+	originalMessage: string;
+	constructor(message: string, originalError?: any) {
+		const name = 'SendCompletionPromptError';
+		const msg =
+			`${name}: ${message}` + (originalError ? `\nCaused by: ${originalError?.message}` : '');
+		super(msg);
+		this.name = name;
+		this.cause = originalError; // Storing the original error
+		this.originalMessage = originalError?.message;
+	}
+}
+
+class SendFailedSync extends Error {
+	originalMessage: string;
+	constructor(message: string, originalError?: any) {
+		const name = 'SendFailedSync';
+		const msg =
+			`${name}: ${message}` + (originalError ? `\nCaused by: ${originalError?.message}` : '');
+		super(msg);
+		this.name = name;
+		this.cause = originalError; // Storing the original error
+		this.originalMessage = originalError?.message;
+	}
+}
+
+const cronTypesMap = {
 	'* * * * *': 'sync-cron',
 	'0 8 * * *': 'send-completion-prompt-cron',
 	'0 9 * * *': 'send-failed-sync-notify-cron',
+};
+const cronTypesErrors = {
+	'* * * * *': SyncError,
+	'0 8 * * *': SendCompletionPromptError,
+	'0 9 * * *': SendFailedSync,
 };
 
 const handler: ExportedHandler<Env, string> = {
@@ -68,7 +112,7 @@ const handler: ExportedHandler<Env, string> = {
 			}
 			if (ev.event && 'cron' in ev.event) {
 				// @ts-ignore
-				type = crontTypesMap[ev.event.cron] || 'cron';
+				type = cronTypesMap[ev.event.cron] || 'cron';
 			}
 
 			sentry.setTag('ct.type', type);
@@ -83,8 +127,7 @@ const handler: ExportedHandler<Env, string> = {
 				sentry.setUser({ email: log.message[1] });
 			} else {
 				sentry.addBreadcrumb({
-					message:
-						log.message.length === 1 ? JSON.stringify(log.message[0]) : JSON.stringify(log.message),
+					message: log.message.map((m: any) => JSON.stringify(m)).join(', '),
 					type: log.level === 'error' ? 'error' : 'info',
 					level: log.level === 'error' ? 'error' : 'info',
 					timestamp: Math.floor(log.timestamp / 1000), // Sentry expects seconds
@@ -92,7 +135,10 @@ const handler: ExportedHandler<Env, string> = {
 			}
 		});
 
-		await sentry.captureException(new Error(ev.exceptions[0].message));
+		// @ts-ignore
+		const CtError = cronTypesErrors[ev.event.cron] || Error;
+
+		await sentry.captureException(new CtError(ev.exceptions[0].message));
 	},
 
 	/**
