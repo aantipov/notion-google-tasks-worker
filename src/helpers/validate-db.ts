@@ -12,7 +12,7 @@ const DbPropsSchema = z.object({
 	status: z.object({
 		id: z.string(),
 		name: z.string(),
-		type: z.literal('status'), // TODO: ensure Status prop has proper values
+		type: z.literal('status'),
 		status: z.object({
 			options: z
 				.array(

@@ -9,53 +9,15 @@ import { handleScheduledSync } from './scheduledSync.js';
 
 class SyncError extends Error {
 	originalMessage: string;
-	constructor(message: string, originalError?: any) {
+	constructor(originalError: any) {
 		const name = 'SyncError';
-		const msg =
-			`${name}: ${message}` + (originalError ? `\nCaused by: ${originalError?.message}` : '');
+		const msg = `${name}: ${originalError?.message}`;
 		super(msg);
 		this.name = name;
 		this.cause = originalError; // Storing the original error
 		this.originalMessage = originalError?.message;
 	}
 }
-
-class SendCompletionPromptError extends Error {
-	originalMessage: string;
-	constructor(message: string, originalError?: any) {
-		const name = 'SendCompletionPromptError';
-		const msg =
-			`${name}: ${message}` + (originalError ? `\nCaused by: ${originalError?.message}` : '');
-		super(msg);
-		this.name = name;
-		this.cause = originalError; // Storing the original error
-		this.originalMessage = originalError?.message;
-	}
-}
-
-class SendFailedSync extends Error {
-	originalMessage: string;
-	constructor(message: string, originalError?: any) {
-		const name = 'SendFailedSync';
-		const msg =
-			`${name}: ${message}` + (originalError ? `\nCaused by: ${originalError?.message}` : '');
-		super(msg);
-		this.name = name;
-		this.cause = originalError; // Storing the original error
-		this.originalMessage = originalError?.message;
-	}
-}
-
-const cronTypesMap = {
-	'* * * * *': 'sync-cron',
-	'0 8 * * *': 'send-completion-prompt-cron',
-	'0 9 * * *': 'send-failed-sync-notify-cron',
-};
-const cronTypesErrors = {
-	'* * * * *': SyncError,
-	'0 8 * * *': SendCompletionPromptError,
-	'0 9 * * *': SendFailedSync,
-};
 
 const handler: ExportedHandler<Env, string> = {
 	/**
@@ -85,7 +47,39 @@ const handler: ExportedHandler<Env, string> = {
 	 */
 	async queue(batch, env, ctx) {
 		// There is only one message in the batch because we set "max_batch_size" to 1 in the wrangler.toml config
-		ctx.waitUntil(handleQueue(batch.messages[0].body, env));
+		const email = batch.messages[0].body;
+		ctx.waitUntil(handleQueue());
+
+		/**
+		 * If the function throws, the message won't be re-queued and retried
+		 * because we set "max_retries" to 0 in the wrangler.toml config.
+		 * We don't need retries because we depend on lastSynced timestamp in our DB
+		 * The return value is ignored: it should return either a value or a promise.
+		 */
+		async function handleQueue() {
+			const sentry = new Toucan({
+				dsn: env.SENTRY_DSN,
+				context: ctx,
+			});
+			sentry.setUser({ email });
+			sentry.addBreadcrumb({
+				message: 'Syncing user',
+				timestamp: Math.floor(Date.now() / 1000), // Sentry expects seconds
+			});
+			try {
+				await syncUser(email, env, sentry);
+			} catch (error: any) {
+				sentry.addBreadcrumb({
+					message: 'Saving sync error to DB',
+					timestamp: Math.floor(Date.now() / 1000), // Sentry expects seconds
+					category: 'error-post-processing',
+					level: 'info',
+				});
+				await handleSyncError(email, env, error);
+				await sentry.captureException(new SyncError(error));
+				return;
+			}
+		}
 	},
 
 	/**
@@ -94,51 +88,45 @@ const handler: ExportedHandler<Env, string> = {
 	 * https://developers.cloudflare.com/workers/runtime-apis/handlers/tail/#tailitems
 	 */
 	async tail(events, env, context) {
+		const ev = events[0];
+		if (ev.outcome === 'ok') {
+			return;
+		}
+
 		const sentry = new Toucan({
 			dsn: env.SENTRY_DSN,
 			context,
 		});
-		const ev = events[0];
-		const hasErrorLogs = ev.logs.some((log) => log.level === 'error');
-		if (ev.outcome === 'ok' && !hasErrorLogs) {
-			return;
-		}
 		sentry.setTag('ct.outcome', ev.outcome);
-		(() => {
+
+		(function () {
 			let type = 'unknown';
 
 			if (ev.event && 'queue' in ev.event) {
-				type = 'sync';
-			}
-			if (ev.event && 'cron' in ev.event) {
-				// @ts-ignore
-				type = cronTypesMap[ev.event.cron] || 'cron';
+				type = 'queue';
+			} else if (ev.event && 'cron' in ev.event) {
+				type = 'cron ' + ev.event.cron;
 			}
 
 			sentry.setTag('ct.type', type);
 		})();
+
 		if (ev.outcome !== 'exception') {
 			await sentry.captureException(new Error(ev.outcome));
 			return;
 		}
+
 		// Record console.log as breadcrumbs
 		ev.logs.forEach((log) => {
-			if (log.message.length === 2 && log.message[0] === 'email') {
-				sentry.setUser({ email: log.message[1] });
-			} else {
-				sentry.addBreadcrumb({
-					message: log.message.map((m: any) => JSON.stringify(m)).join(', '),
-					type: log.level === 'error' ? 'error' : 'info',
-					level: log.level === 'error' ? 'error' : 'info',
-					timestamp: Math.floor(log.timestamp / 1000), // Sentry expects seconds
-				});
-			}
+			sentry.addBreadcrumb({
+				message: log.message.map((m: any) => JSON.stringify(m)).join(', '),
+				type: log.level === 'error' ? 'error' : 'info',
+				level: log.level === 'error' ? 'error' : 'info',
+				timestamp: Math.floor(log.timestamp / 1000), // Sentry expects seconds
+			});
 		});
 
-		// @ts-ignore
-		const CtError = cronTypesErrors[ev.event.cron] || Error;
-
-		await sentry.captureException(new CtError(ev.exceptions[0].message));
+		await sentry.captureException(new Error(ev.exceptions[0].message));
 	},
 
 	/**
@@ -154,24 +142,6 @@ const handler: ExportedHandler<Env, string> = {
 };
 
 export default handler;
-
-/**
- * If the function throws, the message won't be re-queued and retried
- * because we set "max_retries" to 0 in the wrangler.toml config.
- * We don't need retries because we depend on lastSynced timestamp in our DB
- * The return value is ignored: it should return either a value or a promise.
- */
-async function handleQueue(email: string, env: Env) {
-	console.log('email', email);
-	try {
-		await syncUser(email, env);
-		console.log('User synced successfully');
-	} catch (error: any) {
-		console.error('Error handling queue', error);
-		await handleSyncError(email, env, error);
-		throw error;
-	}
-}
 
 async function handleSyncError(email: string, env: Env, error: any) {
 	const db = drizzle(env.DB, { logger: false });

@@ -3,11 +3,12 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"deploy": "wrangler deploy",
+		"deploy": "rm -rf ./dist && wrangler deploy --dry-run --outdir ./dist && pnpm run sentry-sourcemap && wrangler deploy ./dist/index.js --no-bundle",
 		"start": "wrangler dev --port 3000",
 		"dev": "wrangler dev --port 3000",
 		"dev-cron": "wrangler dev --test-scheduled --port 3000",
-		"dry-run": "wrangler deploy --dry-run --outdir mydist",
+		"sentry-sourcemap": "sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist --project=notion-gtasks-worker-cron",
+		"dryrun": "rm -rf ./dist && wrangler deploy --dry-run --outdir ./dist",
 		"db": "wrangler d1 execute notion-gtasks --local",
 		"db:migration-gen": "drizzle-kit generate:sqlite",
 		"db:migration-drop": "drizzle-kit drop",
@@ -23,6 +24,7 @@
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20230419.0",
+		"@sentry/cli": "^2.28.0",
 		"drizzle-kit": "^0.20.10",
 		"typescript": "^5.0.4",
 		"vite": "^5.0.12",
