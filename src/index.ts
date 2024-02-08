@@ -77,7 +77,8 @@ const handler: ExportedHandler<Env, string> = {
 				});
 				await handleSyncError(email, env, error);
 				await sentry.captureException(new SyncError(error));
-				return;
+				console.log('SKIP'); // Skip the error handling in Tail handler
+				throw new Error('SKIP'); // We need to throw an error to mark the worker call as failed in Cloudflare metrics
 			}
 		}
 	},
@@ -90,6 +91,9 @@ const handler: ExportedHandler<Env, string> = {
 	async tail(events, env, context) {
 		const ev = events[0];
 		if (ev.outcome === 'ok') {
+			return;
+		}
+		if (ev.logs.find((log) => log.message[0] === 'SKIP')) {
 			return;
 		}
 
