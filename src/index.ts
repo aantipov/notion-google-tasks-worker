@@ -70,7 +70,7 @@ const handler: ExportedHandler<Env, string> = {
 				await syncUser(email, env, sentry);
 			} catch (error: any) {
 				sentry.addBreadcrumb({
-					message: 'Saving sync error to DB',
+					message: '** saving sync error to DB **',
 					timestamp: Math.floor(Date.now() / 1000), // Sentry expects seconds
 					category: 'error-post-processing',
 					level: 'info',

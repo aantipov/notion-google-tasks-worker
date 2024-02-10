@@ -98,9 +98,9 @@ export async function fetchTasks(databaseId: string, propsMap: NPropsMapT, acces
 			// @ts-ignore
 			lastEditedByBot: result.properties[propsMap.lastEditedBy.name].last_edited_by.type === 'bot',
 		}));
-	} catch (error) {
-		console.error('Notion API: failed to fetch tasks', error);
-		throw new Error('Notion API: failed to fetch tasks', { cause: error });
+	} catch (error: any) {
+		console.error(`Notion API: failed to fetch tasks: ${error?.message}`, error);
+		throw new Error(`Notion API: failed to fetch tasks: ${error?.message}`, { cause: error });
 	}
 }
 
