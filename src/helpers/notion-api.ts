@@ -191,8 +191,10 @@ export async function fetchPropsMap(databaseId: string, accessToken: string) {
 		} as NPropsMapT;
 		console.log('NotionAPI: fetched DB properties map', databaseId);
 		return propsMap;
-	} catch (error) {
-		console.error('NotionAPI: failed to fetch DB properties map', error);
-		throw new Error('NotionAPI: failed to fetch DB properties map', { cause: error });
+	} catch (error: any) {
+		console.error(`NotionAPI: failed to fetch DB properties map: ${error?.message}`, error);
+		throw new Error(`NotionAPI: failed to fetch DB properties map: ${error?.message}`, {
+			cause: error,
+		});
 	}
 }
