@@ -19,6 +19,7 @@
 		"db:prod": "wrangler d1 execute notion-gtasks",
 		"db:prod:all": "wrangler d1 execute notion-gtasks --command='SELECT * FROM users'",
 		"db:prod:active-count": "wrangler d1 execute notion-gtasks --command='SELECT COUNT(*) FROM users WHERE sync_error IS NULL AND last_synced IS NOT NULL'",
+		"db:prod:count": "wrangler d1 execute notion-gtasks --command='SELECT COUNT(*) FROM users'",
 		"test": "vitest",
 		"tail": "wrangler tail"
 	},

@@ -74,9 +74,9 @@ export default async function syncNotionWithGoogle(
 		await Promise.all(nTasksUpdatesPromises);
 
 		return mappingUpdates;
-	} catch (error) {
-		console.error('Notion: failed to match with Google', error);
-		throw new Error('Notion: failed to match with Google', { cause: error });
+	} catch (error: any) {
+		console.error(`Notion: failed to match with Google: ${error?.message}`, error);
+		throw new Error(`Notion: failed to match with Google: ${error?.message}`, { cause: error });
 	}
 }
 

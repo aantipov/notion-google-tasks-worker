@@ -221,8 +221,8 @@ export async function fetchAccessToken(refreshToken: string, env: Env): Promise<
 		const tokenData = (await tokensResp.json()) as TokenResponseT;
 
 		return tokenData.access_token;
-	} catch (error) {
-		console.error('GoogleAPI: failed to fetch access token', error);
-		throw new Error('GoogleAPI: failed to fetch access token', { cause: error });
+	} catch (error: any) {
+		console.error(`GoogleAPI: failed to fetch access token: ${error?.message}`, error);
+		throw new Error(`GoogleAPI: failed to fetch access token: ${error?.message}`, { cause: error });
 	}
 }
