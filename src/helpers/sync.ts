@@ -27,9 +27,9 @@ export async function syncUser(userEmail: string, env: Env, sentry: Toucan): Pro
 			modified: userData.modified,
 			lastSynced: userData.lastSynced,
 		});
-	} catch (error) {
-		console.error('Failed fetching user data', error);
-		throw new Error('Failed fetching user data', { cause: error });
+	} catch (error: any) {
+		console.error(`Failed to fetch userData: ${error?.message}`, error);
+		throw new Error(`Failed to fetch userData: ${error?.message}`, { cause: error });
 	}
 
 	let newMapping = [...userData.mapping];
