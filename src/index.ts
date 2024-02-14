@@ -11,7 +11,7 @@ class SyncError extends Error {
 	originalMessage: string;
 	constructor(originalError: any) {
 		const name = 'SyncError';
-		const msg = `${name}: ${originalError?.message}`;
+		const msg = `${originalError?.message || 'Unknown error'}`;
 		super(msg);
 		this.name = name;
 		this.cause = originalError; // Storing the original error
