@@ -194,13 +194,13 @@ export async function fetchTasks(userData: UserSyncedT, accessToken: string): Pr
 			},
 		});
 		if (!tasksResp.ok) {
-			throw new Error(`Failed to fetch tasks list: ${tasksResp.status} ${tasksResp.statusText}`);
+			throw new Error(`${tasksResp.status} ${tasksResp.statusText}`);
 		}
 		const tasksData = (await tasksResp.json()) as GTasksResponseT;
 		return tasksData.items;
-	} catch (error) {
-		console.error('GoogleAPI: failed to fetch tasks', error);
-		throw new Error('GoogleAPI: failed to fetch tasks', { cause: error });
+	} catch (error: any) {
+		console.error(`GoogleAPI: failed to fetch tasks: ${error?.message}`, error);
+		throw new Error(`GoogleAPI: failed to fetch tasks: ${error?.message}`, { cause: error });
 	}
 }
 
