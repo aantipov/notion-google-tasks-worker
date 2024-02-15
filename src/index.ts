@@ -159,6 +159,7 @@ async function handleSyncError(email: string, env: Env, error: any) {
 		num: num + 1,
 		nextRetry: getNextRetryInMs(num),
 		sentEmail: user.syncError?.sentEmail || false,
+		started: user.syncError?.started || Date.now(),
 	};
 	await db.update(users).set({ syncError }).where(eq(users.email, email));
 }
