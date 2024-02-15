@@ -24,7 +24,7 @@ export const users = sqliteTable('users', {
 		num: number; // Number of consecutive sync errors
 		nextRetry: number | null; // Timestamp in ms. Null if no retries left. Max 10 retries within 5 days
 		sentEmail: boolean;
-		started?: number; // Timestamp in ms. undefined for old records
+		started: number; // Timestamp in ms. undefined for old records
 	}>(), // Last sync error message. Reset to null on successful sync
 	created: integer('created', { mode: 'timestamp' }).notNull(),
 	modified: integer('modified', { mode: 'timestamp' }).notNull(),
