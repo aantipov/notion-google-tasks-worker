@@ -3,7 +3,7 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"deploy": "rm -rf ./dist && wrangler deploy --dry-run --outdir ./dist && pnpm run sentry-sourcemap && wrangler deploy ./dist/index.js --no-bundle",
+		"deploy": "vitest --run && rm -rf ./dist && wrangler deploy --dry-run --outdir ./dist && pnpm run sentry-sourcemap && wrangler deploy ./dist/index.js --no-bundle",
 		"start": "wrangler dev --port 3000",
 		"dev": "wrangler dev --port 3000",
 		"dev-cron": "wrangler dev --test-scheduled --port 3000",

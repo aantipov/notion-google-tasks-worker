@@ -22,6 +22,20 @@
       "when": 1704698224747,
       "tag": "0002_many_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1708100463865,
+      "tag": "0003_lame_gamma_corps",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1708100813914,
+      "tag": "0004_powerful_sentinels",
+      "breakpoints": true
     }
   ]
 }
