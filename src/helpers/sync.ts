@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import { COMPLETION_MAP_TIMEOUT_DAYS } from '../constants';
 import * as googleApi from './google-api';
 import * as notionApi from './notion-api';
-import { UserSyncedT, users } from '@/schema';
+import { UserSyncedT, users, syncStats } from '@/schema';
 import { eq } from 'drizzle-orm';
 import syncGoogleWithNotion, { type MappingUpdatesT } from './sync-google-with-notion';
 import syncNotionWithGoogle from './sync-notion-with-google';
@@ -78,7 +78,7 @@ export async function syncUser(userEmail: string, env: Env, sentry: Toucan): Pro
 		updated: gMappingsUpdates.updated.length,
 		deleted: gMappingsUpdates.deleted.length,
 	});
-	await updateUserMappingInDB(gMappingsUpdates);
+	await updateUserMappingInDB(gMappingsUpdates, 'google');
 	sentry.addBreadcrumb({
 		message: 'Syncing Google with Notion Results ' + JSON.stringify(gMappingsUpdates),
 		timestamp: Math.floor(Date.now() / 1000), // Sentry expects seconds
@@ -102,7 +102,7 @@ export async function syncUser(userEmail: string, env: Env, sentry: Toucan): Pro
 		updated: nMappingsUpdates.updated.length,
 		deleted: nMappingsUpdates.deleted.length,
 	});
-	await updateUserMappingInDB(nMappingsUpdates);
+	await updateUserMappingInDB(nMappingsUpdates, 'notion');
 	sentry.addBreadcrumb({
 		message: 'Syncing Notion with Google Results ' + JSON.stringify(nMappingsUpdates),
 		timestamp: Math.floor(Date.now() / 1000), // Sentry expects seconds
@@ -144,24 +144,31 @@ export async function syncUser(userEmail: string, env: Env, sentry: Toucan): Pro
 		timestamp: Math.floor(Date.now() / 1000), // Sentry expects seconds
 	});
 
-	async function updateUserMappingInDB(gMappingsUpdates: MappingUpdatesT) {
+	async function updateUserMappingInDB(
+		gMappingsUpdates: MappingUpdatesT,
+		system: 'google' | 'notion'
+	) {
 		try {
-			if (
-				!gMappingsUpdates.newItems.length &&
-				!gMappingsUpdates.deleted.length &&
-				!gMappingsUpdates.updated.length
-			) {
+			const { newItems, deleted, updated } = gMappingsUpdates;
+			if (!newItems.length && !deleted.length && !updated.length) {
 				return;
 			}
-			newMapping.push(...gMappingsUpdates.newItems);
-			newMapping = newMapping.filter(([gTaskId]) => !gMappingsUpdates.deleted.includes(gTaskId));
+			newMapping.push(...newItems);
+			newMapping = newMapping.filter(([gTaskId]) => !deleted.includes(gTaskId));
 			newMapping = newMapping.map(([gTaskId, nTaskId]) => {
-				const nTaskCompletedAt = gMappingsUpdates.updated.find(
-					([gTaskId]) => gTaskId === gTaskId
-				)?.[1];
+				const nTaskCompletedAt = updated.find(([gTaskId]) => gTaskId === gTaskId)?.[1];
 				return [gTaskId, nTaskId, nTaskCompletedAt];
 			});
 			await db.update(users).set({ mapping: newMapping }).where(eq(users.email, userEmail));
+			await db.insert(syncStats).values({
+				email: userEmail,
+				created: newItems.length,
+				updated: updated.length,
+				deleted: deleted.length,
+				total: newItems.length + updated.length + deleted.length,
+				system,
+				created_at: new Date(),
+			});
 			console.log('Mapping changes saved to DB');
 		} catch (error) {
 			console.error('Error updating user mapping in DB', error);

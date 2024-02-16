@@ -58,12 +58,13 @@ const __syncedUsers = sqliteTable('some-imaginary-table', {
 export type UserT = typeof users.$inferInsert;
 export type UserSyncedT = typeof __syncedUsers.$inferInsert;
 
-export const sync_stats = sqliteTable('sync_stats', {
+export const syncStats = sqliteTable('sync_stats', {
 	id: integer('id').primaryKey(),
 	email: text('email').notNull(),
 	created: integer('created', { mode: 'number' }).notNull(),
 	updated: integer('updated', { mode: 'number' }).notNull(),
 	deleted: integer('deleted', { mode: 'number' }).notNull(),
 	total: integer('total', { mode: 'number' }).notNull(),
+	system: text('system', { enum: ['google', 'notion'] }).notNull(),
 	created_at: integer('created_at', { mode: 'timestamp' }).notNull(),
 });
