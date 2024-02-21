@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1704544987328,
-      "tag": "0000_perfect_nick_fury",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1704544999636,
-      "tag": "0001_tricky_dust",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1704698224747,
-      "tag": "0002_many_stranger",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1708100463865,
-      "tag": "0003_lame_gamma_corps",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1708100813914,
-      "tag": "0004_powerful_sentinels",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1708102034052,
-      "tag": "0005_cooing_meltdown",
+      "when": 1708525821065,
+      "tag": "0000_mute_calypso",
       "breakpoints": true
     }
   ]

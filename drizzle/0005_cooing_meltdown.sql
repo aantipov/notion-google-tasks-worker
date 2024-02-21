@@ -1,1 +1,0 @@
-ALTER TABLE sync_stats ADD `system` text NOT NULL;

@@ -6,6 +6,8 @@ import { getUsersForSync } from './scheduledSync';
 import { DrizzleD1Database, drizzle } from 'drizzle-orm/d1';
 import { users } from './schema';
 
+type NewUserT = typeof users.$inferInsert;
+
 describe('Test D1', () => {
 	let worker: UnstableDevWorker;
 	let db: DrizzleD1Database;
@@ -19,7 +21,7 @@ describe('Test D1', () => {
 	});
 
 	beforeEach(async () => {
-		await db.delete(users);
+		await db.delete(users); // delete all rows in the table
 		await populateDummyData(db);
 	});
 
@@ -142,5 +144,5 @@ async function populateDummyData(db: DrizzleD1Database) {
 			created: tenDaysAgo,
 			modified: tenDaysAgo,
 		},
-	]);
+	] as NewUserT[]);
 }
