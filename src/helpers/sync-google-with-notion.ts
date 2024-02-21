@@ -28,7 +28,7 @@ export default async function syncGoogleWithNotion(
 		const { tasklistId, mapping } = userData;
 
 		// Handle DELETED Notion tasks: delete them in Google
-		// Deleted tasks are those that are in the mapping but not in the list of all Notion tasks
+		// Deleted tasks are those in the mapping but not in the all Notion tasks list
 		const n2gMapping = new Map(mapping.map(([gTaskId, nTaskId]) => [nTaskId, gTaskId]));
 		const nTasksIds = nTasksWithConflicts.map((t) => t.id);
 		const nSyncedTasksIds = mapping.map(([, nTaskId]) => nTaskId);

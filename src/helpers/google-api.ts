@@ -121,9 +121,7 @@ export async function updateTask(
 		});
 
 		if (!tasksResp.ok) {
-			throw new Error(
-				`GoogleAPI: failed to update a task: ${tasksResp.status} ${tasksResp.statusText}`
-			);
+			throw new Error(`${tasksResp.status} ${tasksResp.statusText}`);
 		}
 		const updatedTask = (await tasksResp.json()) as GTaskT;
 		console.log('GoogleAPI: updated task', gTaskId);
