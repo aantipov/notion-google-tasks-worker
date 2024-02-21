@@ -99,8 +99,11 @@ export async function fetchTasks(databaseId: string, propsMap: NPropsMapT, acces
 			lastEditedByBot: result.properties[propsMap.lastEditedBy.name].last_edited_by.type === 'bot',
 		}));
 	} catch (error: any) {
-		console.error(`Notion API: failed to fetch tasks: ${error?.message}`, error);
-		throw new Error(`Notion API: failed to fetch tasks: ${error?.message}`, { cause: error });
+		const msg = error?.message.startsWith('Could not find database with ID')
+			? 'Database not found. Make sure the relevant pages and databases are shared with your integration'
+			: error?.message;
+		console.error(`Notion API: failed to fetch tasks: ${msg}`, error);
+		throw new Error(`Notion API: failed to fetch tasks: ${msg}`, { cause: error });
 	}
 }
 
