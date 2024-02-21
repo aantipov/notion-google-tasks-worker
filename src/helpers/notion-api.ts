@@ -182,7 +182,9 @@ export async function fetchPropsMap(databaseId: string, accessToken: string) {
 		const validRes = validateDbBSchema(dbSchema);
 		if (validRes.success === false) {
 			console.error('Invalid DB schema', validRes.issues);
-			throw new Error('Invalid DB schema', { cause: validRes.issues });
+			throw new Error('Invalid DB schema: ' + JSON.stringify(validRes.issues), {
+				cause: validRes.issues,
+			});
 		}
 
 		const propsMap = {
