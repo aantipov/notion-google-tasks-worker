@@ -10,9 +10,9 @@ import type { Toucan } from 'toucan-js';
 
 class NonBlockSyncError extends Error {
 	originalMessage: string;
-	constructor(originalError: any) {
+	constructor(originalError: any, prefix: string = '') {
 		const name = 'NonBlockSyncError';
-		const msg = `${originalError?.message || 'Unknown error'}`;
+		const msg = `${prefix} ${originalError?.message || 'Unknown error'}`;
 		super(msg);
 		this.name = name;
 		this.cause = originalError; // Storing the original error
@@ -110,10 +110,7 @@ export async function syncUser(userEmail: string, env: Env, sentry: Toucan): Pro
 	if (gMappingsUpdates.errors.length) {
 		console.error('Google Tasks Sync Errors', JSON.stringify(gMappingsUpdates.errors));
 		for (const error of gMappingsUpdates.errors) {
-			const theErr = new Error(`Sync Google w/ Notion: ${error?.message}`, {
-				cause: error,
-			});
-			await sentry.captureException(new NonBlockSyncError(theErr));
+			await sentry.captureException(new NonBlockSyncError(error, 'Sync GoogleWithNotion: '));
 		}
 	}
 
