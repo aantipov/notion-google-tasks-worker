@@ -197,8 +197,11 @@ export async function fetchPropsMap(databaseId: string, accessToken: string) {
 		console.log('NotionAPI: fetched DB properties map', databaseId);
 		return propsMap;
 	} catch (error: any) {
-		console.error(`NotionAPI: failed to fetch DB properties map: ${error?.message}`, error);
-		throw new Error(`NotionAPI: failed to fetch DB properties map: ${error?.message}`, {
+		const msg = error?.message.startsWith('Could not find database with ID')
+			? 'Database not found. Make sure the relevant pages and databases are shared with your integration'
+			: error?.message;
+		console.error(`NotionAPI: failed to fetch DBPropsMap: ${msg}`, error);
+		throw new Error(`NotionAPI: failed to fetch DBPropsMap: ${msg}`, {
 			cause: error,
 		});
 	}

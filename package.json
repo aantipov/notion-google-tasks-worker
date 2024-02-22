@@ -9,7 +9,6 @@
 		"dev-cron": "wrangler dev --test-scheduled --port 3000",
 		"sentry-sourcemap": "sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist --project=notion-gtasks-worker-cron",
 		"dryrun": "rm -rf ./dist && wrangler deploy --dry-run --outdir ./dist",
-		"db": "wrangler d1 execute notion-gtasks --local",
 		"db:migr:gen": "drizzle-kit generate:sqlite",
 		"db:migr:drop": "drizzle-kit drop",
 		"db:migr:check": "drizzle-kit check:sqlite",
