@@ -8,6 +8,18 @@ import syncGoogleWithNotion, { type MappingUpdatesT } from './sync-google-with-n
 import syncNotionWithGoogle from './sync-notion-with-google';
 import type { Toucan } from 'toucan-js';
 
+class NonBlockSyncError extends Error {
+	originalMessage: string;
+	constructor(originalError: any) {
+		const name = 'NonBlockSyncError';
+		const msg = `${originalError?.message || 'Unknown error'}`;
+		super(msg);
+		this.name = name;
+		this.cause = originalError; // Storing the original error
+		this.originalMessage = originalError?.message;
+	}
+}
+
 export async function syncUser(userEmail: string, env: Env, sentry: Toucan): Promise<void> {
 	const db = drizzle(env.DB, { logger: true });
 
@@ -95,6 +107,15 @@ export async function syncUser(userEmail: string, env: Env, sentry: Toucan): Pro
 		message: 'Syncing Google with Notion Results ' + JSON.stringify(gMappingsUpdates),
 		timestamp: Math.floor(Date.now() / 1000), // Sentry expects seconds
 	});
+	if (gMappingsUpdates.errors.length) {
+		console.error('Google Tasks Sync Errors', JSON.stringify(gMappingsUpdates.errors));
+		for (const error of gMappingsUpdates.errors) {
+			const theErr = new Error(`Sync Google w/ Notion: ${error?.message}`, {
+				cause: error,
+			});
+			await sentry.captureException(new NonBlockSyncError(theErr));
+		}
+	}
 
 	// ==================================================================
 	// ==== 7. Sync Notion with Google ====

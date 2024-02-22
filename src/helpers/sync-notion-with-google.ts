@@ -16,6 +16,7 @@ export default async function syncNotionWithGoogle(
 			newItems: [],
 			deleted: [],
 			updated: [],
+			errors: [],
 		};
 		const {
 			nToken: { access_token: accessToken },

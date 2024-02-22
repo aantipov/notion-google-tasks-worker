@@ -10,6 +10,7 @@ export type MappingUpdatesT = {
 	newItems: [GTaskIdT, NTaskIdT, CompletedAtT][];
 	deleted: GTaskIdT[];
 	updated: [GTaskIdT, CompletedAtT][];
+	errors: any[];
 };
 
 export default async function syncGoogleWithNotion(
@@ -24,6 +25,7 @@ export default async function syncGoogleWithNotion(
 			newItems: [],
 			deleted: [],
 			updated: [],
+			errors: [],
 		};
 		const { tasklistId, mapping } = userData;
 
@@ -68,7 +70,15 @@ export default async function syncGoogleWithNotion(
 			}
 
 			mappingUpdates.updated.push([gTaskId, nTaskCompletedAt]);
-			return await googleApi.updateTask(gTaskId, nTask, tasklistId, accessToken);
+			let result;
+			// Handle exceptions granually to not stop the whole process
+			try {
+				result = await googleApi.updateTask(gTaskId, nTask, tasklistId, accessToken);
+			} catch (error) {
+				result = null;
+				mappingUpdates.errors.push(error);
+			}
+			return result;
 		});
 
 		await Promise.all(gTasksUpdatesPromises);
